@@ -1,0 +1,38 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:   # cho phép bấm "Run workflow" thủ công
+
+jobs:
+  build:
+    runs-on: windows-latest   # máy Windows thật của GitHub
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Download dependencies
+        run: go mod tidy
+
+      - name: Build EXE
+        run: |
+          mkdir dist
+          go build -ldflags="-s -w -H windowsgui" -trimpath -o dist/IntegratedTranslator.exe ./cmd/translator
+        env:
+          CGO_ENABLED: 0
+          GOOS: windows
+          GOARCH: amd64
+
+      - name: Upload EXE as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: IntegratedTranslator
+          path: dist/IntegratedTranslator.exe
+          retention-days: 30
