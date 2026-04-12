@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-	"syscall"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
@@ -171,7 +170,9 @@ func SetClipboard(text string) {
 	if ptr == 0 {
 		return
 	}
-	syscall.CopyMemory(unsafe.Pointer(ptr), unsafe.Pointer(&utf16[0]), size)
+	buf := unsafe.Slice((*byte)(unsafe.Pointer(ptr)), int(size))
+	src := unsafe.Slice((*byte)(unsafe.Pointer(&utf16[0])), int(size))
+	copy(buf, src)
 	procGlobalUnlock.Call(h)
 
 	procOpenClipboard.Call(0)
