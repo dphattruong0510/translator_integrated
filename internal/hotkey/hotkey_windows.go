@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-	"unsafe"
+		"unsafe"
 
 	"golang.org/x/sys/windows"
 )
@@ -51,7 +51,8 @@ func NewManager() *Manager {
 
 // parseHotkey parses "ctrl+shift+r" → (modifiers, vkCode, error)
 func parseHotkey(combo string) (uint32, uint32, error) {
-	parts := strings.Split(strings.ToLower(combo), "+")
+	combo = strings.NewReplacer("<ctrl>", "ctrl", "<control>", "ctrl", "<shift>", "shift", "<alt>", "alt", "<cmd>", "cmd").Replace(strings.ToLower(combo))
+	parts := strings.Split(combo, "+")
 	var mods uint32
 	var vk uint32
 	for _, p := range parts {
@@ -170,9 +171,9 @@ func SetClipboard(text string) {
 	if ptr == 0 {
 		return
 	}
-	buf := unsafe.Slice((*byte)(unsafe.Pointer(ptr)), int(size))
+	dst := unsafe.Slice((*byte)(unsafe.Pointer(ptr)), int(size))
 	src := unsafe.Slice((*byte)(unsafe.Pointer(&utf16[0])), int(size))
-	copy(buf, src)
+	copy(dst, src)
 	procGlobalUnlock.Call(h)
 
 	procOpenClipboard.Call(0)
