@@ -256,6 +256,7 @@ func main() {
 	cfg, err := config.Load()
 	if err != nil {
 		cfg = &config.Defaults
+		_ = cfg.Save()
 	}
 
 	app := NewApp(cfg)
